@@ -49,10 +49,25 @@ In the sheet: **Extensions → Apps Script**, then create these 4 files and past
 | `Index` | **+ → HTML** | [`Index.html`](Index.html) |
 | `Analyzer` | **+ → HTML** | [`Analyzer.html`](Analyzer.html) |
 
-Names must match exactly. Then open **Config** and replace `CHANGE-ME` with your own secret leader code
-(the leader tools stay locked until you do). Save 💾.
+Names must match exactly.
 
-### 3. Publish
+### 3. Set your leader code
+Open the **`Config`** file (the only file you ever need to edit) and change this line:
+
+```js
+var LEADER_CODE = 'CHANGE-ME';
+```
+
+to your own secret code, keeping the quotes:
+
+```js
+var LEADER_CODE = 'MySecretCode123';
+```
+
+Save 💾. Until you do this, the leader tools refuse to unlock. Don't edit `Code.gs` for this —
+it only *checks* whether you changed the code.
+
+### 4. Publish
 1. **Deploy → New deployment** → ⚙️ → **Web app**.
 2. **Execute as: Me** and **Who has access: Anyone**.
    (Not "User accessing the web app" — that would make every member log in.)

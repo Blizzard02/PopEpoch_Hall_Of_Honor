@@ -106,6 +106,7 @@ function log_(values) {
   log.appendRow(values);
 }
 
+// Don't put your code here — set LEADER_CODE in Config.gs. This only refuses the placeholder.
 function checkCode_(code) {
   if (!LEADER_CODE || LEADER_CODE === 'CHANGE-ME') throw new Error('Leader tools are off: set your own LEADER_CODE in Config.gs first.');
   if (String(code || '').trim() !== LEADER_CODE) throw new Error('Wrong code.');
