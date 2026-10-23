@@ -1,0 +1,144 @@
+<script>
+/* Hall of Honor screenshot reader. Works on any phone size: the image is scaled to 900px wide,
+   then lined up vertically against a reference screenshot before checking each title. */
+var REF_PROFILE=[119.5,130.1,133.6,140.0,136.9,125.3,127.2,139.3,136.6,144.8,146.9,152.2,148.8,142.1,101.5,89.8,94.0,94.5,90.3,96.7,115.7,128.7,125.0,113.0,104.4,104.2,103.1,105.3,107.7,114.3,118.1,122.5,128.0,120.5,126.1,132.4,140.0,144.9,145.7,146.5,148.5,161.1,172.6,173.1,172.8,175.1,174.2,171.1,169.5,171.8,179.8,179.4,175.4,184.1,185.6,179.7,168.2,164.7,181.3,189.0,190.0,188.3,190.8,190.9,189.7,190.1,188.3,187.5,186.9,184.3,184.1,187.6,187.9,189.2,188.6,185.3,183.5,178.8,169.2,172.9,176.1,179.6,179.3,179.4,177.3,173.3,173.8,175.9,161.5,151.9,153.1,156.9,151.1,148.8,156.8,171.3,148.3,144.1,156.6,149.9,144.9,152.3,165.9,165.4,164.9,161.4,132.7,123.0,119.6,117.1,125.8,128.8,128.7,117.4,113.7,107.0,111.5,112.3,115.9,119.8,141.3,149.2,153.5,147.3,145.4,138.8,124.7,121.3,158.0,168.0,167.7,168.6,168.8,168.4,167.6,165.2,159.1,156.3,151.6,151.3,141.4,128.4,138.6,146.8,143.1,150.3,151.3,153.8,148.7,137.6,98.0,92.9,96.2,95.2,92.1,99.3,119.7,129.7,122.8,113.3,103.6,104.0,103.2,105.6,108.4,115.5,118.4,123.6,127.3,120.2,129.6,135.9,151.1,156.4,155.6,154.2,149.2,158.1,164.5,164.0,172.9,190.2,187.0,174.5,160.6,166.2,178.7,180.5,175.1,183.5,183.0,176.1,166.8,164.1,181.6,184.6,183.7,183.3,181.1,179.4,180.2,179.5,178.1,175.6,175.6,175.5,175.9,174.4,176.9,178.1,176.4,175.2,177.4,178.4,176.8,176.0,172.4,171.8,167.5,164.9,161.8,159.9,175.3,168.8,153.5,147.2,145.6,148.1,142.1,143.9,154.9,164.3,147.3,147.4,146.3,140.1,130.1,140.2,159.8,157.7,153.9,145.3,124.1,118.8,113.2,115.0,129.1,127.9,127.2,117.2,112.9,107.4,112.7,113.9,116.0,122.2,143.5,150.0,153.3,146.6,145.3,136.2,123.3,123.5,162.1,167.9,167.7,168.8,168.8,168.3,167.4,164.7,158.3,155.9,151.4,150.8,139.1,129.4,140.4,146.3,145.7,150.3,152.2,153.7,149.6,135.2,99.0,98.4,100.7,98.4,95.2,101.5,122.4,130.0,121.0,112.6,102.9,103.8,103.3,105.8,109.1,116.5,118.6,124.9,126.4,121.6,132.6,139.3,155.5,151.1,150.9,157.4,143.3,153.8,165.1,163.1,177.6,182.9,177.3,169.6,151.6,161.9,179.4,180.7,174.4,180.4,173.4,170.9,160.7,162.4,179.5,183.7,185.2,183.9,177.4,180.7,182.7,179.5,178.2,177.0,176.8,178.5,179.3,178.8,176.4,173.7,174.4,173.8,172.2,170.8,173.4,174.3,171.2,176.8,171.9,164.9,156.7,157.7,177.7,170.6,153.8,148.9,147.0,141.9,131.6,139.2,155.0,159.1,143.3,145.9,142.5,137.7,128.0,140.8,156.9,157.0,149.8,141.1,120.5,117.0,111.5,114.4,129.4,126.1,123.1,115.1,110.2,107.0,112.3,114.5,116.1,124.3,145.5,150.9,152.9,145.9,145.1,132.9,122.3,128.9,164.6,167.7,167.8,168.8,168.8,168.2,167.2,163.9,157.8,155.5,151.4,149.9,137.0,129.5,142.5,145.5,146.8,150.0,152.8,152.2,146.9,126.9,90.5,92.8,94.7,91.4,91.1,103.1,124.7,130.0,118.9,112.0,101.8,103.8,103.7,106.3,110.0,117.3,119.0,125.5,125.7,122.3,137.5,142.6,161.3,156.7,160.8,152.1,146.7,162.0,168.3,162.3,182.3,187.3,179.5,164.3,145.9,170.5,184.5,184.9,181.0,188.4,185.9,176.3,170.0,176.1,191.5,192.5,191.0,189.7,188.1,185.2,183.7,184.9,187.4,185.0,180.1,177.0,176.5,175.7,174.4,173.9,172.1,172.3,174.4,170.7,165.2,169.7,170.5,175.8,178.3,176.3,164.0,157.4,184.4,163.6,151.5,145.4,132.5,130.8,130.2,132.6,152.3,149.7,131.9,137.8,136.4,131.6,122.9,136.6,149.5,150.9,137.3,128.3,111.0,108.7,105.5,114.4,128.9,126.0,121.5,114.7,108.7,109.0,111.0,113.8,115.2,131.0,146.8,151.7,150.4,144.2,142.1,129.1,129.4,134.9,130.7,115.2,114.2,115.6];
+var DIGIT_TEMPLATES={"1":{"g":[0.0,0.0,0.0,0.0,0.38,1.0,1.0,1.0,0.0,0.0,0.09,0.69,1.0,1.0,1.0,1.0,0.56,0.56,0.97,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.91,0.69,0.72,1.0,1.0,1.0,0.25,0.25,0.06,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.91,1.0,0.97],"ar":0.406},"2":{"g":[0.0,0.0,0.5,1.0,1.0,0.6,0.0,0.0,0.2,0.6,1.0,1.0,1.0,1.0,1.0,0.2,0.4,1.0,0.9,0.3,0.2,0.85,1.0,0.6,0.9,1.0,0.5,0.0,0.0,0.4,1.0,0.6,0.0,0.05,0.05,0.0,0.0,0.4,1.0,0.6,0.0,0.0,0.0,0.0,0.0,0.7,1.0,0.5,0.0,0.0,0.0,0.0,0.4,0.9,1.0,0.1,0.0,0.0,0.05,0.4,0.8,0.9,0.3,0.05,0.0,0.0,0.2,1.0,1.0,0.4,0.0,0.0,0.0,0.25,0.85,1.0,0.4,0.05,0.0,0.0,0.4,0.8,1.0,1.0,0.6,0.4,0.4,0.3,0.4,1.0,1.0,1.0,1.0,1.0,1.0,0.9],"ar":0.656},"3":{"g":[0.0,0.0,1.0,1.0,1.0,1.0,0.0,0.0,0.5,1.0,1.0,1.0,1.0,1.0,1.0,0.0,1.0,1.0,0.75,0.5,0.5,0.75,1.0,0.5,0.0,0.0,0.0,0.0,0.0,0.5,1.0,0.75,0.0,0.0,0.0,0.0,0.0,0.75,1.0,0.5,0.0,0.0,0.25,1.0,1.0,1.0,1.0,0.0,0.0,0.0,0.25,1.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.5,0.75,1.0,0.62,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.5,1.0,0.25,0.0,0.0,0.25,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.5,0.5,0.5,1.0,1.0,1.0,1.0,0.5,0.12],"ar":0.647},"4":{"g":[0.0,0.0,0.0,0.0,1.0,1.0,0.5,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.5,0.0,0.0,0.0,0.0,0.75,1.0,1.0,0.5,0.0,0.0,0.0,0.0,1.0,1.0,1.0,0.5,0.0,0.0,0.0,0.75,0.75,1.0,1.0,0.5,0.0,0.0,0.0,1.0,0.0,0.0,1.0,0.5,0.0,0.0,0.5,1.0,0.0,1.0,1.0,0.5,0.0,0.0,1.0,0.75,0.5,1.0,1.0,0.75,0.25,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.5,0.0,0.5,0.5,0.5,1.0,1.0,1.0,0.5,0.0,0.0,0.0,0.0,0.0,1.0,0.5,0.0,0.0,0.0,0.0,0.0,0.5,1.0,0.5,0.0],"ar":0.824}};
+var TITLES = [
+  {name: 'Justice Official',         group: 'Chancellor', x: 90,  y: 1695},
+  {name: 'City Official',            group: 'Chancellor', x: 270, y: 1720},
+  {name: 'Military Official',        group: 'Chancellor', x: 450, y: 1695},
+  {name: 'Finance Official',         group: 'Chancellor', x: 630, y: 1720},
+  {name: 'Transport Official',       group: 'Chancellor', x: 810, y: 1695},
+  {name: 'Eastern Lord',             group: 'Lord',       x: 180, y: 1287},
+  {name: 'Southern Lord',            group: 'Lord',       x: 360, y: 1312},
+  {name: 'Western Lord',             group: 'Lord',       x: 540, y: 1287},
+  {name: 'Northern Lord',            group: 'Lord',       x: 720, y: 1312},
+  {name: 'Fearless Overlord',        group: 'Overlord',   x: 180, y: 876},
+  {name: 'Triumphant Overlord',      group: 'Overlord',   x: 360, y: 902},
+  {name: 'Blazing Overlord',         group: 'Overlord',   x: 540, y: 876},
+  {name: 'Steelheart Overlord',      group: 'Overlord',   x: 720, y: 902},
+  {name: 'King of the Nine Realms',  group: 'Sovereign',  x: 270, y: 492},
+  {name: 'King of All Realms',       group: 'Sovereign',  x: 450, y: 467},
+  {name: 'King of the 7 Seas',       group: 'Sovereign',  x: 630, y: 492}
+];
+var OWNED_SATURATION = 0.25;   // gold pedestal ~0.55-0.62, grey pedestal ~0.00
+var MIN_MATCH = 0.8;           // below this the picture is probably not the Hall of Honor
+var DOUBTFUL_DIGIT = 0.25;     // digit matches worse than this get a "please check" mark
+var DIGIT_MARGIN = 0.08;       // ...and so do digits that look almost as much like another digit
+var GW = 8, GH = 12;
+
+// img = {data: RGBA array, width, height}
+function rowProfile(img) {
+  var p = new Float64Array(img.height), d = img.data, w = img.width;
+  for (var y = 0; y < img.height; y++) {
+    var s = 0, i = y * w * 4;
+    for (var x = 0; x < w; x++, i += 4) s += (d[i] + d[i + 1] + d[i + 2]) / 3;
+    p[y] = s / w;
+  }
+  return p;
+}
+
+function zscore(a) {
+  var n = a.length, m = 0, v = 0, i;
+  for (i = 0; i < n; i++) m += a[i];
+  m /= n;
+  for (i = 0; i < n; i++) v += (a[i] - m) * (a[i] - m);
+  var sd = Math.sqrt(v / n) + 1e-9, out = new Float64Array(n);
+  for (i = 0; i < n; i++) out[i] = (a[i] - m) / sd;
+  return out;
+}
+
+// small = the screenshot scaled to 300px wide. Returns the vertical shift in 900px-wide pixels.
+function findOffset(small) {
+  var p = rowProfile(small), win = zscore(REF_PROFILE), best = {corr: -2, off: 0};
+  for (var off = -150; off < 150; off++) {
+    var s0 = 60 + off;
+    if (s0 < 0 || s0 + win.length > p.length) continue;
+    var seg = zscore(p.subarray(s0, s0 + win.length)), c = 0;
+    for (var i = 0; i < win.length; i++) c += seg[i] * win[i];
+    c /= win.length;
+    if (c > best.corr) best = {corr: c, off: off};
+  }
+  return {offset: best.off * 3, corr: best.corr};
+}
+
+function saturation(img, cx, cy) {
+  var d = img.data, w = img.width, s = 0, n = 0;
+  for (var y = cy - 22; y < cy + 22; y++) for (var x = cx - 60; x < cx + 60; x++) {
+    var i = (y * w + x) * 4, mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]);
+    s += (mx - mn) / (mx + 1); n++;
+  }
+  return s / n;
+}
+
+// White digit shapes on the pedestal plaque -> list of {v: GW*GH fill grid, ar: width/height}
+function glyphsFromMask(m, W, H) {
+  var out = [], x = 0;
+  function colHas(c) { for (var r = 0; r < H; r++) if (m[r * W + c]) return true; return false; }
+  while (x < W) {
+    if (!colHas(x)) { x++; continue; }
+    var x0 = x;
+    while (x < W && colHas(x)) x++;
+    var r0 = -1, r1 = -1;
+    for (var r = 0; r < H; r++) {
+      for (var c = x0; c < x; c++) if (m[r * W + c]) { if (r0 < 0) r0 = r; r1 = r; break; }
+    }
+    if (r1 - r0 < 10) continue;
+    var hh = r1 - r0 + 1, ww = x - x0, v = [];
+    for (var gr = 0; gr < GH; gr++) for (var gc = 0; gc < GW; gc++) {
+      var ra = Math.floor(gr * hh / GH), rb = Math.max(Math.floor((gr + 1) * hh / GH), ra + 1);
+      var ca = Math.floor(gc * ww / GW), cb = Math.max(Math.floor((gc + 1) * ww / GW), ca + 1);
+      var on = 0, n = 0;
+      for (var yy = ra; yy < rb; yy++) for (var xx = ca; xx < cb; xx++) { on += m[(r0 + yy) * W + x0 + xx]; n++; }
+      v.push(on / n);
+    }
+    out.push({v: v, ar: ww / hh});
+  }
+  return out;
+}
+
+function plaqueGlyphs(img, cx, cy) {
+  var W = 70, H = 44, m = new Uint8Array(W * H), d = img.data;
+  for (var r = 0; r < H; r++) for (var c = 0; c < W; c++) {
+    var i = ((cy - 24 + r) * img.width + (cx - 35 + c)) * 4;
+    m[r * W + c] = Math.min(d[i], d[i + 1], d[i + 2]) > 190 ? 1 : 0;
+  }
+  return glyphsFromMask(m, W, H);
+}
+
+function matchDigit(g, templates) {
+  var best = {digit: null, score: 1e9, second: 1e9};
+  for (var k in templates) {
+    var t = templates[k], s = 0;
+    for (var i = 0; i < t.g.length; i++) s += Math.abs(g.v[i] - t.g[i]);
+    s = s / t.g.length + Math.abs(g.ar - t.ar) * 0.5;
+    if (s < best.score) best = {digit: k, score: s, second: best.score};
+    else if (s < best.second) best.second = s;
+  }
+  return best;
+}
+
+// img = screenshot at 900px wide, small = same at 300px wide, templates = digit templates
+function analyzeScreenshot(img, small, templates) {
+  var align = findOffset(small), results = [];
+  TITLES.forEach(function (t) {
+    var y = t.y + align.offset, r = {name: t.name, group: t.group, x: t.x, y: y};
+    if (y - 30 < 0 || y + 30 > img.height) { r.visible = false; r.count = 0; r.doubtful = true; results.push(r); return; }
+    r.visible = true;
+    r.owned = saturation(img, t.x, y) > OWNED_SATURATION;
+    r.count = 0; r.doubtful = false;
+    if (r.owned) {
+      var gs = plaqueGlyphs(img, t.x, y), digits = '';
+      gs.forEach(function (g) {
+        var m = matchDigit(g, templates);
+        digits += m.digit;
+        if (m.score > DOUBTFUL_DIGIT || m.second - m.score < DIGIT_MARGIN) r.doubtful = true;
+      });
+      r.count = digits ? parseInt(digits, 10) : 1;
+      if (!digits) r.doubtful = true;
+    }
+    results.push(r);
+  });
+  return {ok: align.corr >= MIN_MATCH, corr: align.corr, offset: align.offset, titles: results};
+}
+</script>

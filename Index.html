@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: #f6efe3; --card: #fffaf2; --ink: #2b2118; --muted: #6b5d4f; --line: #d9c9b0;
+    --gold: #c9821f; --gold-soft: #fbe9c8; --green: #2f7d32; --green-dark: #22602a;
+    --warn: #fff3b0; --warn-line: #d4a400; --grey: #e4ded5; --red: #a3261d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 20px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 16px 16px 60px; }
+  h1 { font-size: 28px; margin: 4px 0 12px; }
+  h2 { font-size: 23px; margin: 0 0 10px; }
+  h3 { font-size: 20px; margin: 18px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab { flex: 1; padding: 14px 8px; font-size: 19px; font-weight: 700; border: 2px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); cursor: pointer; }
+  .tab.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .step { background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+  .num { display: inline-flex; width: 36px; height: 36px; border-radius: 50%; background: var(--gold); color: #fff; align-items: center; justify-content: center; font-weight: 800; margin-right: 8px; }
+  select, input[type=text], input[type=password] { width: 100%; font: inherit; font-size: 22px; padding: 14px; border: 2px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); }
+  select:focus, input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+  .lock { text-align: center; }
+  .lock .icon { font-size: 52px; line-height: 1; margin: 4px 0 8px; }
+  .lock p { color: var(--muted); margin: 0 0 14px; }
+  .lock input { text-align: center; letter-spacing: .08em; }
+  .big { display: block; width: 100%; padding: 20px; font-size: 23px; font-weight: 800; border: 0; border-radius: 14px; cursor: pointer; text-align: center; }
+  .big.upload { background: var(--gold); color: #fff; }
+  .big.save { background: var(--green); color: #fff; }
+  .big.save:disabled { background: #9db89e; cursor: default; }
+  .big.plain { background: var(--grey); color: var(--ink); }
+  .hint { color: var(--muted); font-size: 18px; margin: 8px 0 0; }
+  .msg { border-radius: 12px; padding: 14px 16px; margin: 12px 0; font-size: 20px; }
+  .msg.err { background: #fde2df; color: var(--red); border: 2px solid #f0b4ad; }
+  .msg.ok { background: #e3f3e3; color: var(--green-dark); border: 2px solid #a9d6aa; font-weight: 700; }
+  .msg.warn { background: var(--warn); border: 2px solid var(--warn-line); }
+  .hidden { display: none !important; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .t { border: 2px solid var(--line); border-radius: 14px; padding: 8px; text-align: center; background: #fff; }
+  .t.owned { border-color: var(--gold); background: var(--gold-soft); }
+  .t.doubt { border: 3px dashed var(--warn-line); background: var(--warn); }
+  .t img { width: 100%; max-width: 130px; border-radius: 8px; display: block; margin: 0 auto 4px; }
+  .t .nm { font-weight: 700; font-size: 17px; line-height: 1.2; min-height: 2.4em; }
+  .t .note { font-size: 15px; color: #7a5b00; font-weight: 700; }
+  .ctr { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 6px; }
+  .ctr button { width: 48px; height: 48px; font-size: 28px; font-weight: 800; border-radius: 12px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+  .ctr .val { min-width: 40px; font-size: 26px; font-weight: 800; }
+  .t:not(.owned) .val { color: var(--muted); }
+  .spinner { text-align: center; padding: 24px; font-size: 22px; }
+  details { background: #fff; border: 2px solid var(--line); border-radius: 12px; margin-bottom: 8px; }
+  summary { padding: 12px 14px; cursor: pointer; font-weight: 700; display: flex; justify-content: space-between; gap: 10px; }
+  summary .cnt { color: var(--gold); white-space: nowrap; }
+  details .body { padding: 0 14px 12px; font-size: 18px; }
+  .pill { display: inline-block; padding: 2px 10px; margin: 3px 4px 3px 0; border-radius: 999px; background: var(--gold-soft); border: 1px solid var(--gold); font-size: 16px; }
+  .pill.no { background: var(--grey); border-color: var(--line); color: var(--muted); }
+  .kpis { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .kpi { flex: 1 1 140px; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+  .kpi b { display: block; font-size: 30px; }
+  .kpi span { color: var(--muted); font-size: 16px; }
+  label.lbl { display: block; font-weight: 700; margin: 14px 0 6px; }
+  .pick { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #fff; border: 2px solid var(--line); border-radius: 12px; margin-bottom: 6px; cursor: pointer; }
+  .pick input { width: 26px; height: 26px; flex: none; }
+  .pick .sub { margin-left: auto; color: var(--muted); font-size: 16px; text-align: right; }
+  .pick.on { border-color: var(--green); background: #eef7ee; }
+  .stepper { display: flex; align-items: center; gap: 12px; }
+  .stepper button { width: 54px; height: 54px; font-size: 30px; font-weight: 800; border-radius: 12px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+  .stepper input { width: 90px; text-align: center; font-size: 26px; font-weight: 800; padding: 10px; border: 2px solid var(--line); border-radius: 12px; }
+  textarea { width: 100%; min-height: 160px; font: 17px/1.4 ui-monospace, Consolas, monospace; padding: 12px; border: 2px solid var(--line); border-radius: 12px; }
+  .row2 { display: flex; gap: 10px; margin-top: 10px; }
+  .row2 .big { flex: 1; }
+  .big.confirm { background: var(--red); color: #fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⚜️ Guild Titles</h1>
+  <div class="tabs">
+    <button class="tab on" id="tabUpload" onclick="showTab('upload')">📷 Add my titles</button>
+    <button class="tab" id="tabStats" onclick="statsTapped()">📊 Guild statistics</button>
+    <button class="tab hidden" id="tabLeader" onclick="showTab('leader')">🔑 Leader</button>
+  </div>
+
+  <!-- ===== Upload ===== -->
+  <div id="upload">
+    <div class="step">
+      <h2><span class="num">1</span>Choose your name</h2>
+      <select id="who" onchange="whoChanged()"><option value="">Loading names…</option></select>
+      <input type="text" id="newName" class="hidden" placeholder="Type your game name" oninput="refreshSave()" style="margin-top:10px">
+    </div>
+
+    <div class="step">
+      <h2><span class="num">2</span>Add your screenshot</h2>
+      <label class="big upload" for="file">📷 Choose screenshot</label>
+      <input type="file" id="file" accept="image/*" class="hidden" onchange="fileChosen(this)">
+      <p class="hint">In the game, open <b>Hall of Honor</b>, take a screenshot, then press the button above.</p>
+      <div id="readErr" class="msg err hidden"></div>
+    </div>
+
+    <div class="step hidden" id="checkStep">
+      <h2><span class="num">3</span>Check your titles</h2>
+      <p class="hint" style="margin-top:0">Gold = you have it. If a number is wrong, press <b>−</b> or <b>+</b>.</p>
+      <div id="doubtMsg" class="msg warn hidden">⚠️ Please check the boxes with a dashed yellow border.</div>
+      <div id="results"></div>
+    </div>
+
+    <div class="step hidden" id="saveStep">
+      <h2><span class="num">4</span>Save</h2>
+      <button class="big save" id="saveBtn" onclick="save()" disabled>✅ Save my titles</button>
+      <div id="saveMsg" class="msg hidden"></div>
+    </div>
+  </div>
+
+  <!-- ===== Leader tools (hidden: tap "Guild statistics" 5 times) ===== -->
+  <div id="leader" class="hidden">
+    <div id="lockBox" class="step lock">
+      <div class="icon">🔐</div>
+      <h2>Leader tools</h2>
+      <p>Enter the leader code to continue.</p>
+      <input type="password" id="code" placeholder="Leader code" autocomplete="off" onkeydown="if(event.key==='Enter')unlock()">
+      <button class="big save" style="margin-top:12px" onclick="unlock()">🔓 Unlock</button>
+      <div id="lockMsg" class="msg err hidden"></div>
+    </div>
+
+    <div id="tools" class="hidden">
+      <div class="tabs">
+        <button class="tab on" id="subPlan" onclick="showSub('plan')">🎯 Plan event</button>
+        <button class="tab" id="subWon" onclick="showSub('won')">🏆 Won event</button>
+        <button class="tab" id="subMembers" onclick="showSub('members')">👥 Members</button>
+      </div>
+
+      <div id="plan">
+        <div class="step">
+          <h2>Event setup</h2>
+          <label class="lbl" for="pLeader">Leader</label>
+          <select id="pLeader" class="players"></select>
+          <label class="lbl" for="pLeaderTitle">Leader's title</label>
+          <select id="pLeaderTitle" class="titles"></select>
+          <label class="lbl" for="pEliteTitle">Elites' title</label>
+          <select id="pEliteTitle" class="titles"></select>
+          <label class="lbl" for="pCount">Number of elites</label>
+          <div class="stepper">
+            <button onclick="stepCount(-1)">−</button>
+            <input type="number" id="pCount" value="5" min="1" max="50" inputmode="numeric">
+            <button onclick="stepCount(1)">+</button>
+          </div>
+          <button class="big upload" style="margin-top:16px" onclick="propose()">🔍 Propose members</button>
+        </div>
+
+        <div class="step hidden" id="proposal">
+          <div id="pLeaderBox" class="hidden">
+            <h2>Proposed leader</h2>
+            <p class="hint" style="margin-top:0">Members who <b>don't have</b> the leader's title, longest since they last led first. Tap to choose another.</p>
+            <div id="pLeaderList"></div>
+          </div>
+          <h2 style="margin-top:16px">Proposed elites</h2>
+          <div id="pNotes"></div>
+          <p class="hint" style="margin-top:0">Members who <b>don't have</b> this title, fewest titles first. Ticked = proposed. Tap to change.</p>
+          <div id="pList"></div>
+          <label class="lbl" for="pText">Copy for Discord</label>
+          <textarea id="pText" readonly onclick="this.select()"></textarea>
+          <div class="row2">
+            <button class="big plain" onclick="copyPlan()">📋 Copy</button>
+            <button class="big save" id="pWonBtn" onclick="planWon()">🏆 They won</button>
+          </div>
+          <div id="pMsg" class="msg hidden"></div>
+        </div>
+      </div>
+
+      <div id="won" class="hidden">
+        <div class="step">
+          <h2>Add won titles</h2>
+          <p class="hint" style="margin-top:0">For members who forgot to upload. Adds <b>+1</b> of the title to everyone ticked.</p>
+          <label class="lbl" for="wTitle">Title won</label>
+          <select id="wTitle" class="titles" onchange="drawWonList()"></select>
+          <label class="lbl" for="wSearch">Members</label>
+          <input type="text" id="wSearch" placeholder="🔍 Search a name" oninput="drawWonList()" style="margin-bottom:10px">
+          <div id="wList"></div>
+          <label class="pick" style="margin-top:12px"><input type="checkbox" id="wLeader"><span>They were the event <b>leader</b> (saves today as their leader date)</span></label>
+          <button class="big save" id="wBtn" style="margin-top:12px" onclick="saveWon()" disabled>Tick the winners</button>
+          <div id="wMsg" class="msg hidden"></div>
+        </div>
+      </div>
+
+      <div id="members" class="hidden">
+        <div class="step">
+          <h2>Members</h2>
+          <p class="hint" style="margin-top:0"><b>Updated</b> = last time they uploaded their own screenshot.
+            <b>Leader</b> = last event you confirmed them as leader.</p>
+          <label class="lbl" for="mSort">Sort by</label>
+          <select id="mSort" onchange="drawMembers()">
+            <option value="leader">Longest since leader</option>
+            <option value="updated">Oldest update</option>
+            <option value="name">Name</option>
+          </select>
+          <input type="text" id="mSearch" placeholder="🔍 Search a name" oninput="drawMembers()" style="margin:10px 0">
+          <div id="mList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Statistics ===== -->
+  <div id="stats" class="hidden">
+    <div id="statsBody"><div class="spinner">Loading…</div></div>
+  </div>
+</div>
+
+<?!= include('Analyzer'); ?>
+<script>
+var current = null;        // analysis result with editable counts
+var NEW = '__new__';
+
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function remember(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+function showTab(t) {
+  ['upload', 'stats', 'leader'].forEach(function (k) {
+    $(k).classList.toggle('hidden', k !== t);
+    $('tab' + k.charAt(0).toUpperCase() + k.slice(1)).classList.toggle('on', k === t);
+  });
+  if (t === 'stats' || (t === 'leader' && leaderCode)) loadStats();
+}
+
+/* ---------- Step 1: name ---------- */
+function loadPlayers() {
+  google.script.run.withSuccessHandler(function (names) {
+    var last = remember('guildName'), html = '<option value="">— Tap to choose —</option>';
+    names.forEach(function (n) { html += '<option' + (n === last ? ' selected' : '') + '>' + esc(n) + '</option>'; });
+    html += '<option value="' + NEW + '">➕ My name is not on the list</option>';
+    $('who').innerHTML = html;
+    whoChanged();
+  }).withFailureHandler(function (e) {
+    $('who').innerHTML = '<option value="' + NEW + '">➕ Type my name</option>';
+    whoChanged();
+  }).getPlayers();
+}
+function playerName() {
+  return $('who').value === NEW ? $('newName').value.trim() : $('who').value;
+}
+function whoChanged() {
+  $('newName').classList.toggle('hidden', $('who').value !== NEW);
+  if ($('who').value === NEW) $('newName').focus();
+  refreshSave();
+}
+function refreshSave() {
+  $('saveBtn').disabled = !(current && playerName());
+  $('saveBtn').textContent = playerName() ? '✅ Save titles for ' + playerName() : '✅ Save my titles (choose your name first)';
+}
+
+/* ---------- Step 2: read the screenshot ---------- */
+var templates = null;
+function buildTemplates() {
+  // Real digits 1-4 come from game screenshots; other digits are drawn with a similar bold font.
+  var t = {};
+  for (var k in DIGIT_TEMPLATES) t[k] = DIGIT_TEMPLATES[k];
+  var c = document.createElement('canvas'); c.width = 70; c.height = 44;
+  var x = c.getContext('2d');
+  for (var d = 0; d <= 9; d++) {
+    if (t[d]) continue;
+    x.fillStyle = '#000'; x.fillRect(0, 0, 70, 44);
+    x.fillStyle = '#fff'; x.font = 'bold 24px Arial, sans-serif'; x.textAlign = 'center';
+    x.fillText(String(d), 35, 36);
+    var px = x.getImageData(0, 0, 70, 44).data, m = new Uint8Array(70 * 44);
+    for (var i = 0; i < m.length; i++) m[i] = px[i * 4] > 190 ? 1 : 0;
+    var g = glyphsFromMask(m, 70, 44)[0];
+    if (g) t[d] = {g: g.v, ar: g.ar};
+  }
+  return t;
+}
+
+function scaled(img, w) {
+  var c = document.createElement('canvas');
+  c.width = w; c.height = Math.round(img.naturalHeight * w / img.naturalWidth);
+  var x = c.getContext('2d');
+  x.imageSmoothingQuality = 'high';
+  x.drawImage(img, 0, 0, c.width, c.height);
+  return c;
+}
+
+function fileChosen(input) {
+  var f = input.files && input.files[0];
+  input.value = '';
+  if (!f) return;
+  $('readErr').classList.add('hidden');
+  $('saveMsg').classList.add('hidden');
+  $('checkStep').classList.remove('hidden');
+  $('saveStep').classList.add('hidden');
+  $('results').innerHTML = '<div class="spinner">⏳ Reading your screenshot…</div>';
+  var url = URL.createObjectURL(f), img = new Image();
+  img.onload = function () {
+    setTimeout(function () { analyze(img); URL.revokeObjectURL(url); }, 30);
+  };
+  img.onerror = function () { failRead('That file is not a picture. Please choose your screenshot.'); };
+  img.src = url;
+}
+
+function failRead(text) {
+  current = null;
+  $('checkStep').classList.add('hidden');
+  $('saveStep').classList.add('hidden');
+  $('readErr').innerHTML = text;
+  $('readErr').classList.remove('hidden');
+}
+
+function analyze(img) {
+  if (!templates) templates = buildTemplates();
+  var big = scaled(img, 900), small = scaled(img, 300);
+  var bigData = big.getContext('2d').getImageData(0, 0, big.width, big.height);
+  var smallData = small.getContext('2d').getImageData(0, 0, small.width, small.height);
+  var r = analyzeScreenshot(bigData, smallData, templates);
+  if (!r.ok) {
+    failRead('😕 This does not look like the <b>Hall of Honor</b> screen.<br>Please open Hall of Honor in the game, take a new screenshot and try again.');
+    return;
+  }
+  r.titles.forEach(function (t) {
+    var c = document.createElement('canvas'); c.width = 170; c.height = 200;
+    c.getContext('2d').drawImage(big, t.x - 85, t.y - 170, 170, 200, 0, 0, 170, 200);
+    t.thumb = c.toDataURL('image/jpeg', 0.75);
+  });
+  current = r;
+  render();
+  $('saveStep').classList.remove('hidden');
+  refreshSave();
+  $('checkStep').scrollIntoView({behavior: 'smooth'});
+}
+
+function render() {
+  var html = '', group = '', doubts = 0;
+  current.titles.forEach(function (t, i) {
+    if (t.group !== group) { html += (group ? '</div>' : '') + '<h3>' + t.group + '</h3><div class="grid">'; group = t.group; }
+    var cls = 't' + (t.count > 0 ? ' owned' : '') + (t.doubtful ? ' doubt' : '');
+    if (t.doubtful) doubts++;
+    html += '<div class="' + cls + '">' +
+      (t.visible ? '<img src="' + t.thumb + '" alt="">' : '') +
+      '<div class="nm">' + esc(t.name) + '</div>' +
+      (t.doubtful ? '<div class="note">' + (t.visible ? 'Please check' : 'Not in picture') + '</div>' : '') +
+      '<div class="ctr"><button onclick="bump(' + i + ',-1)" aria-label="less">−</button>' +
+      '<span class="val">' + (t.count > 0 ? t.count : 'No') + '</span>' +
+      '<button onclick="bump(' + i + ',1)" aria-label="more">+</button></div></div>';
+  });
+  $('results').innerHTML = html + '</div>';
+  $('doubtMsg').classList.toggle('hidden', doubts === 0);
+}
+
+function bump(i, d) {
+  var t = current.titles[i];
+  t.count = Math.max(0, t.count + d);
+  t.doubtful = false;
+  render();
+}
+
+/* ---------- Step 4: save ---------- */
+function save() {
+  var name = playerName();
+  if (!name || !current) return;
+  var counts = {};
+  current.titles.forEach(function (t) { counts[t.name] = t.count; });
+  $('saveBtn').disabled = true;
+  $('saveBtn').textContent = '⏳ Saving…';
+  google.script.run.withSuccessHandler(function (res) {
+    remember('guildName', name);
+    $('saveMsg').className = 'msg ok';
+    $('saveMsg').innerHTML = '🎉 Thank you, ' + esc(name) + '! Your titles are saved.';
+    $('saveMsg').classList.remove('hidden');
+    $('saveBtn').textContent = '✔ Saved';
+    if (res.isNew) loadPlayers();
+    statsLoaded = false;
+  }).withFailureHandler(function (e) {
+    $('saveMsg').className = 'msg err';
+    $('saveMsg').textContent = 'Sorry, it did not save: ' + (e && e.message ? e.message : e) + ' — please try again.';
+    $('saveMsg').classList.remove('hidden');
+    refreshSave();
+  }).saveTitles(name, counts);
+}
+
+/* ---------- Statistics ---------- */
+var statsLoaded = false, statsData = null;
+var GROUPS = {'Chancellor': [0, 5], 'Lord': [5, 9], 'Overlord': [9, 13], 'Sovereign': [13, 16]};
+
+function loadStats() {
+  if (statsLoaded) return;
+  $('statsBody').innerHTML = '<div class="spinner">⏳ Loading…</div>';
+  google.script.run.withSuccessHandler(function (s) { statsLoaded = true; statsData = s; drawStats(s); fillLeaderLists(); })
+    .withFailureHandler(function (e) { $('statsBody').innerHTML = '<div class="msg err">Could not load: ' + esc(e.message || e) + '</div>'; })
+    .getStats();
+}
+
+function drawStats(s) {
+  var players = s.players, titles = s.titles;
+  var owned = function (p) { return titles.filter(function (t) { return p.counts[t] > 0; }); };
+  var updated = players.filter(function (p) { return p.updated; }).length;
+  var html = '<div class="kpis">' +
+    '<div class="kpi"><b>' + players.length + '</b><span>members</span></div>' +
+    '<div class="kpi"><b>' + updated + '</b><span>used this page</span></div></div>';
+
+  html += '<h2 style="margin-top:18px">Who has each title</h2>';
+  for (var g in GROUPS) {
+    html += '<h3>' + g + '</h3>';
+    titles.slice(GROUPS[g][0], GROUPS[g][1]).forEach(function (t) {
+      var holders = players.filter(function (p) { return p.counts[t] > 0; })
+        .sort(function (a, b) { return b.counts[t] - a.counts[t]; });
+      html += '<details><summary><span>' + esc(t) + '</span><span class="cnt">' + holders.length + ' members</span></summary><div class="body">' +
+        (holders.length ? holders.map(function (p) { return '<span class="pill">' + esc(p.name) + (p.counts[t] > 1 ? ' ×' + p.counts[t] : '') + '</span>'; }).join('') : 'Nobody yet') +
+        '</div></details>';
+    });
+  }
+
+  html += '<h2 style="margin-top:24px">Members</h2>' +
+    '<input type="text" id="search" placeholder="🔍 Search a name" oninput="filterMembers()" style="margin-bottom:10px">' +
+    '<div id="members">';
+  players.slice().sort(function (a, b) { return owned(b).length - owned(a).length || a.name.localeCompare(b.name); })
+    .forEach(function (p) {
+      var have = owned(p), missing = titles.filter(function (t) { return !(p.counts[t] > 0); });
+      html += '<details data-name="' + esc(p.name.toLowerCase()) + '"><summary><span>' + esc(p.name) + '</span><span class="cnt">' + have.length + ' / ' + titles.length + '</span></summary><div class="body">' +
+        '<div><b>Has:</b> ' + (have.length ? have.map(function (t) { return '<span class="pill">' + esc(t) + (p.counts[t] > 1 ? ' ×' + p.counts[t] : '') + '</span>'; }).join('') : 'none yet') + '</div>' +
+        '<div style="margin-top:6px"><b>Missing:</b> ' + (missing.length ? missing.map(function (t) { return '<span class="pill no">' + esc(t) + '</span>'; }).join('') : 'nothing — all titles! 🏆') + '</div>' +
+        (p.updated ? '<div class="hint">Last updated ' + new Date(p.updated).toLocaleDateString() + '</div>' : '') +
+        '</div></details>';
+    });
+  $('statsBody').innerHTML = html + '</div>';
+}
+
+function filterMembers() {
+  var q = $('search').value.trim().toLowerCase();
+  document.querySelectorAll('#members details').forEach(function (d) {
+    d.classList.toggle('hidden', q && d.getAttribute('data-name').indexOf(q) < 0);
+  });
+}
+
+/* ---------- Leader tools ---------- */
+var leaderCode = null, taps = [];
+
+function statsTapped() {
+  var now = Date.now();
+  taps = taps.filter(function (t) { return now - t < 3000; }).concat(now);
+  if (taps.length >= 5) {
+    taps = [];
+    $('tabLeader').classList.remove('hidden');
+    showTab('leader');
+    return;
+  }
+  showTab('stats');
+}
+
+function unlock() {
+  var code = $('code').value;
+  google.script.run.withSuccessHandler(function () {
+    leaderCode = code;
+    $('lockBox').classList.add('hidden');
+    $('tools').classList.remove('hidden');
+    statsLoaded = false;
+    loadStats();
+  }).withFailureHandler(function (e) {
+    flash($('lockMsg'), 'err', '❌ ' + (e && e.message ? e.message : e));
+  }).verifyCode(code);
+}
+
+function showSub(k) {
+  ['plan', 'won', 'members'].forEach(function (s) {
+    $(s).classList.toggle('hidden', s !== k);
+    $('sub' + s.charAt(0).toUpperCase() + s.slice(1)).classList.toggle('on', s === k);
+  });
+}
+
+function titleOptions() {
+  var html = '', group = '';
+  TITLES.forEach(function (t) {
+    if (t.group !== group) { html += (group ? '</optgroup>' : '') + '<optgroup label="' + t.group + '">'; group = t.group; }
+    html += '<option>' + esc(t.name) + '</option>';
+  });
+  return html + '</optgroup>';
+}
+
+function fillLeaderLists() {
+  if (!leaderCode || !statsData) return;
+  var names = statsData.players.map(function (p) { return p.name; })
+    .sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+  document.querySelectorAll('select.players').forEach(function (sel) {
+    var keep = sel.value;
+    sel.innerHTML = '<option value="">✨ Propose a leader for me</option><option value="__none__">— No leader —</option>' + names.map(function (n) {
+      return '<option' + (n === keep ? ' selected' : '') + '>' + esc(n) + '</option>';
+    }).join('');
+  });
+  document.querySelectorAll('select.titles').forEach(function (sel) {
+    if (!sel.options.length) sel.innerHTML = titleOptions();
+  });
+  drawWonList();
+  drawMembers();
+}
+
+function playerByName(n) {
+  return statsData.players.filter(function (p) { return p.name === n; })[0];
+}
+function titlesOwned(p) {
+  return statsData.titles.filter(function (t) { return p.counts[t] > 0; }).length;
+}
+function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+function flash(el, kind, text) {
+  el.className = 'msg ' + kind;
+  el.textContent = text;
+}
+
+function stepCount(d) {
+  $('pCount').value = Math.max(1, Math.min(50, (parseInt($('pCount').value, 10) || 0) + d));
+}
+
+var plan = null;
+function stamp(iso) { return iso ? new Date(iso).getTime() : 0; }   // never = oldest
+
+function propose() {
+  if (!statsData) return;
+  var choice = $('pLeader').value, leaderTitle = $('pLeaderTitle').value;
+  plan = {auto: choice === '', leaderTitle: leaderTitle, elite: $('pEliteTitle').value,
+          want: Math.max(1, parseInt($('pCount').value, 10) || 1), leaderCands: []};
+  if (plan.auto) {
+    plan.leaderCands = statsData.players
+      .filter(function (p) { return !(p.counts[leaderTitle] > 0); })
+      .sort(function (a, b) {
+        return stamp(a.leader) - stamp(b.leader) || titlesOwned(b) - titlesOwned(a) ||
+               a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      })
+      .slice(0, 6);
+    plan.leader = plan.leaderCands.length ? plan.leaderCands[0].name : '';
+  } else {
+    plan.leader = choice === '__none__' ? '' : choice;
+  }
+  pickElites();
+  $('pMsg').className = 'msg hidden';
+  $('proposal').classList.remove('hidden');
+  drawPlan();
+  $('proposal').scrollIntoView({behavior: 'smooth'});
+}
+
+// Elites: members without the elites' title (never the leader), fewest titles first.
+function pickElites() {
+  plan.candidates = statsData.players
+    .filter(function (p) { return !(p.counts[plan.elite] > 0) && p.name !== plan.leader; })
+    .sort(function (a, b) { return titlesOwned(a) - titlesOwned(b) || a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
+  plan.picked = plan.candidates.slice(0, plan.want).map(function (p) { return p.name; });
+}
+
+function chooseLeader(i) {
+  plan.leader = plan.leaderCands[i].name;
+  pickElites();
+  drawPlan();
+}
+
+function drawPlan() {
+  $('pLeaderBox').classList.toggle('hidden', !plan.auto);
+  if (plan.auto) {
+    $('pLeaderList').innerHTML = plan.leaderCands.map(function (p, i) {
+      var on = p.name === plan.leader;
+      return '<label class="pick' + (on ? ' on' : '') + '"><input type="radio" name="lead"' + (on ? ' checked' : '') + ' onchange="chooseLeader(' + i + ')">' +
+        '<span>' + esc(p.name) + '</span><span class="sub">led: ' + when(p.leader) + '</span></label>';
+    }).join('') || '<p>Everybody already has ' + esc(plan.leaderTitle) + '.</p>';
+  }
+
+  var notes = '';
+  if (plan.leader && !plan.auto) {
+    var lp = playerByName(plan.leader), have = lp ? lp.counts[plan.leaderTitle] : 0;
+    if (have > 0) notes += '<div class="msg warn">ℹ️ ' + esc(plan.leader) + ' already has ' + esc(plan.leaderTitle) + (have > 1 ? ' ×' + have : '') + '.</div>';
+  }
+  if (plan.candidates.length < plan.want) notes += '<div class="msg warn">⚠️ Only ' + plural(plan.candidates.length, 'member') + ' don\'t have ' + esc(plan.elite) + '.</div>';
+  $('pNotes').innerHTML = notes;
+
+  $('pList').innerHTML = plan.candidates.map(function (p, i) {
+    var on = plan.picked.indexOf(p.name) >= 0;
+    return '<label class="pick' + (on ? ' on' : '') + '"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="togglePick(' + i + ')">' +
+      '<span>' + esc(p.name) + '</span><span class="sub">' + titlesOwned(p) + ' / ' + statsData.titles.length + ' titles</span></label>';
+  }).join('') || '<p>Everybody already has this title.</p>';
+  var lines = ['⚔️ Event plan'];
+  if (plan.leader) lines.push('Leader: ' + plan.leader + ' → ' + plan.leaderTitle);
+  lines.push('Elites → ' + plan.elite + ' (' + plan.picked.length + '):');
+  plan.picked.forEach(function (n, i) { lines.push((i + 1) + '. ' + n); });
+  $('pText').value = lines.join('\n');
+  resetConfirm($('pWonBtn'), '🏆 They won');
+}
+
+function togglePick(i) {
+  var n = plan.candidates[i].name, at = plan.picked.indexOf(n);
+  if (at >= 0) plan.picked.splice(at, 1); else plan.picked.push(n);
+  drawPlan();
+}
+
+function copyPlan() {
+  var ta = $('pText');
+  ta.select();
+  var done = function () { flash($('pMsg'), 'ok', '📋 Copied! Paste it in Discord.'); };
+  var fallback = function () {
+    if (document.execCommand('copy')) done();
+    else flash($('pMsg'), 'warn', 'Press and hold the text above, then choose Copy.');
+  };
+  try { navigator.clipboard.writeText(ta.value).then(done, fallback); } catch (e) { fallback(); }
+}
+
+// Buttons that save need a second tap, so a slip of the finger changes nothing.
+function needsConfirm(btn, text) {
+  if (btn.dataset.armed) { resetConfirm(btn); return false; }
+  btn.dataset.armed = '1';
+  btn.dataset.label = btn.textContent;
+  btn.textContent = text;
+  btn.classList.add('confirm');
+  clearTimeout(btn._t);
+  btn._t = setTimeout(function () { resetConfirm(btn); }, 5000);
+  return true;
+}
+function resetConfirm(btn, label) {
+  clearTimeout(btn._t);
+  if (btn.dataset.armed && !label) label = btn.dataset.label;
+  delete btn.dataset.armed;
+  btn.classList.remove('confirm');
+  if (label) btn.textContent = label;
+}
+
+function sendAwards(awards, btn, msg, after) {
+  btn.disabled = true;
+  google.script.run.withSuccessHandler(function (r) {
+    btn.disabled = false;
+    flash(msg, 'ok', '🎉 Saved! ' + plural(r.done, 'title') + ' added.');
+    if (after) after();
+    statsLoaded = false;
+    loadStats();
+  }).withFailureHandler(function (e) {
+    btn.disabled = false;
+    flash(msg, 'err', 'Not saved: ' + (e && e.message ? e.message : e));
+  }).awardTitles(leaderCode, awards);
+}
+
+function planWon() {
+  var awards = [];
+  if (plan.leader) awards.push({title: plan.leaderTitle, names: [plan.leader], leader: true});
+  if (plan.picked.length) awards.push({title: plan.elite, names: plan.picked.slice()});
+  var n = awards.reduce(function (s, a) { return s + a.names.length; }, 0);
+  if (!n) return;
+  if (needsConfirm($('pWonBtn'), 'Tap again to add ' + plural(n, 'title'))) return;
+  sendAwards(awards, $('pWonBtn'), $('pMsg'), function () { $('pWonBtn').textContent = '✔ Saved'; });
+}
+
+var wonPicked = [];
+function drawWonList() {
+  if (!statsData || !$('wTitle').value) return;
+  var title = $('wTitle').value, q = $('wSearch').value.trim().toLowerCase();
+  var players = statsData.players.slice().sort(function (a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
+  $('wList').innerHTML = players.map(function (p) {
+    var on = wonPicked.indexOf(p.name) >= 0, have = p.counts[title] || 0;
+    if (q && !on && p.name.toLowerCase().indexOf(q) < 0) return '';
+    return '<label class="pick' + (on ? ' on' : '') + '"><input type="checkbox"' + (on ? ' checked' : '') +
+      ' onchange="toggleWon(\'' + encodeURIComponent(p.name).replace(/'/g, '%27') + '\')">' +
+      '<span>' + esc(p.name) + '</span><span class="sub">' + (have ? 'has ×' + have : 'not yet') + '</span></label>';
+  }).join('');
+  var btn = $('wBtn');
+  resetConfirm(btn);
+  btn.disabled = !wonPicked.length;
+  btn.textContent = wonPicked.length ? '🏆 Add ' + title + ' to ' + plural(wonPicked.length, 'member') : 'Tick the winners';
+}
+
+function toggleWon(enc) {
+  var n = decodeURIComponent(enc), at = wonPicked.indexOf(n);
+  if (at >= 0) wonPicked.splice(at, 1); else wonPicked.push(n);
+  drawWonList();
+}
+
+function saveWon() {
+  if (!wonPicked.length) return;
+  if (needsConfirm($('wBtn'), 'Tap again to confirm (' + plural(wonPicked.length, 'member') + ')')) return;
+  sendAwards([{title: $('wTitle').value, names: wonPicked.slice(), leader: $('wLeader').checked}], $('wBtn'), $('wMsg'), function () {
+    wonPicked = [];
+    $('wSearch').value = '';
+    $('wLeader').checked = false;
+  });
+}
+
+function when(iso) {
+  if (!iso) return '<i>never</i>';
+  var d = new Date(iso), days = Math.floor((Date.now() - d.getTime()) / 86400000);
+  var ago = days <= 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago';
+  return d.toLocaleDateString() + ' <span style="color:var(--muted)">(' + ago + ')</span>';
+}
+
+function drawMembers() {
+  if (!statsData) return;
+  var by = $('mSort').value, q = $('mSearch').value.trim().toLowerCase();
+  var list = statsData.players.filter(function (p) { return !q || p.name.toLowerCase().indexOf(q) >= 0; })
+    .sort(function (a, b) {
+      if (by !== 'name') {
+        var d = stamp(a[by]) - stamp(b[by]);
+        if (d) return d;
+      }
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
+  $('mList').innerHTML = list.map(function (p) {
+    return '<div class="pick" style="display:block;cursor:default"><b>' + esc(p.name) + '</b>' +
+      '<span class="sub" style="float:right">' + titlesOwned(p) + ' / ' + statsData.titles.length + ' titles</span>' +
+      '<div style="font-size:17px;margin-top:4px">📷 Updated: ' + when(p.updated) + '<br>👑 Leader: ' + when(p.leader) + '</div></div>';
+  }).join('') || '<p>No one found.</p>';
+}
+
+loadPlayers();
+</script>
+</body>
+</html>
