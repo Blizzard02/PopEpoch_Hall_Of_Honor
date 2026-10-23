@@ -71,6 +71,9 @@
   .row2 { display: flex; gap: 10px; margin-top: 10px; }
   .row2 .big { flex: 1; }
   .big.confirm { background: var(--red); color: #fff; }
+  .credit { position: fixed; right: 10px; bottom: 8px; z-index: 5; font-size: 14px; padding: 4px 10px; border-radius: 999px;
+            background: rgba(255, 250, 242, .92); border: 1px solid var(--line); color: var(--muted); text-decoration: none; }
+  .credit b { color: var(--gold); }
 </style>
 </head>
 <body>
@@ -206,6 +209,8 @@
     <div id="statsBody"><div class="spinner">Loading…</div></div>
   </div>
 </div>
+
+<a class="credit" href="https://github.com/Blizzard02/PopEpoch_Hall_Of_Honor" target="_blank" rel="noopener">Powered by <b>Nouk</b></a>
 
 <?!= include('Analyzer'); ?>
 <script>

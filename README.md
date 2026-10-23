@@ -1,4 +1,4 @@
-# Pop Epoch Guild Titles
+# Pop Epoch — Hall of Honor Guild Titles
 
 A free, no-install web page for **Pop Epoch** guilds. Members upload a screenshot of their
 **Hall of Honor** and the page works out which of the 16 titles they have (and how many times),
@@ -30,23 +30,27 @@ Every save is written to an **Upload Log** tab, so mistakes can be undone.
 
 You need a Google account. For privacy you can create one just for the guild.
 
-### 1. Create the spreadsheet
-Create a Google Sheet with a tab named **`Master Sheet`** whose row 1 is:
+### 1. Get the spreadsheet
+1. Download [`template/PopEpoch_Guild_Titles_Template.xlsx`](template/PopEpoch_Guild_Titles_Template.xlsx).
+2. Upload it to your Google Drive, open it, then **File → Save as Google Sheets**.
+3. Add your players' names in column A of **Master Sheet** (or let them add themselves from the page).
 
-| A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Player | Justice Official | City Official | Military Official | Finance Official | Transport Official | Eastern Lord | Southern Lord | Western Lord | Northern Lord | Fearless Overlord | Triumphant Overlord | Blazing Overlord | Steelheart Overlord | King of the Nine Realms | King of All Realms | King of the 7 Seas |
-
-Column order doesn't matter — columns are found by these names. Add your players' names in column A (or let them add themselves).
-The app adds `Last updated` and `Last leader` columns and an `Upload Log` tab on its own.
+The template has a **Master Sheet** tab plus **Officials / Lords / Overlords / Kings** tabs that fill themselves.
+Using your own sheet instead? It just needs a tab named `Master Sheet` with `Player` and the 16 title names in row 1
+(any order). The app adds `Last updated` and `Last leader` columns and an `Upload Log` tab on its own.
 
 ### 2. Add the code
-1. In the sheet: **Extensions → Apps Script**.
-2. Replace the contents of `Code.gs` with [`Code.gs`](Code.gs).
-3. **+ → HTML**, name it exactly `Index`, paste [`Index.html`](Index.html).
-4. **+ → HTML**, name it exactly `Analyzer`, paste [`Analyzer.html`](Analyzer.html).
-5. At the top of `Code.gs`, change `LEADER_CODE = 'CHANGE-ME'` to your own secret code. Leader tools stay locked until you do.
-6. Save 💾.
+In the sheet: **Extensions → Apps Script**, then create these 4 files and paste the contents from this project:
+
+| File in Apps Script | Type | Paste from |
+|---|---|---|
+| `Code` | Script (already there — replace its contents) | [`Code.gs`](Code.gs) |
+| `Config` | **+ → Script** | [`Config.gs`](Config.gs) |
+| `Index` | **+ → HTML** | [`Index.html`](Index.html) |
+| `Analyzer` | **+ → HTML** | [`Analyzer.html`](Analyzer.html) |
+
+Names must match exactly. Then open **Config** and replace `CHANGE-ME` with your own secret leader code
+(the leader tools stay locked until you do). Save 💾.
 
 ### 3. Publish
 1. **Deploy → New deployment** → ⚙️ → **Web app**.
@@ -60,7 +64,7 @@ The app adds `Last updated` and `Last leader` columns and an `Upload Log` tab on
 Test the link once in a private/incognito window: it should open with no login.
 
 ### Updating later
-Paste the new code, Save, then **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**.
+Paste the new `Code`, `Index` and `Analyzer` (**keep your `Config`** — it holds your leader code), Save, then **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**.
 This keeps the same link. (*New deployment* would create a new link.)
 
 ## Good to know
@@ -81,5 +85,8 @@ Tested on screenshots from 4 different phones: 64/64 titles and 34/34 counts rea
 
 If a game update moves the Hall of Honor layout, `TITLES` and `REF_PROFILE` need re-measuring from a new screenshot — contributions welcome!
 
-## License
-[MIT](LICENSE)
+## Credits & license
+Made by **Nouk** ([Blizzard02](https://github.com/Blizzard02)).
+
+Free to use, change and share under the [MIT License with an attribution requirement](LICENSE):
+keep the visible **"Powered by Nouk"** credit (bottom-right of the page) linking back to this project.

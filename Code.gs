@@ -5,9 +5,6 @@
 // Leave empty when this script is opened from the sheet (Extensions → Apps Script).
 // Only fill in a sheet ID (the long part of its link) if the script lives on its own at script.google.com.
 var SPREADSHEET_ID = '';
-// Code for the hidden leader tools (tap "Guild statistics" 5 times). Kept here so members can't see it.
-// Change it to your own secret code before deploying — the leader tools stay locked while it is 'CHANGE-ME'.
-var LEADER_CODE = 'CHANGE-ME';
 var MASTER_SHEET = 'Master Sheet';
 var LOG_SHEET = 'Upload Log';
 var UPDATED_HEADER = 'Last updated';   // member uploaded their own screenshot
@@ -110,7 +107,7 @@ function log_(values) {
 }
 
 function checkCode_(code) {
-  if (!LEADER_CODE || LEADER_CODE === 'CHANGE-ME') throw new Error('Leader tools are off: set your own LEADER_CODE in Code.gs first.');
+  if (!LEADER_CODE || LEADER_CODE === 'CHANGE-ME') throw new Error('Leader tools are off: set your own LEADER_CODE in Config.gs first.');
   if (String(code || '').trim() !== LEADER_CODE) throw new Error('Wrong code.');
 }
 

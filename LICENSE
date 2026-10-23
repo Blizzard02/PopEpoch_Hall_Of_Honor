@@ -1,6 +1,6 @@
-MIT License
+MIT License with Attribution Requirement
 
-Copyright (c) 2026 Blizzard02
+Copyright (c) 2026 Nouk (Blizzard02) — https://github.com/Blizzard02/PopEpoch_Hall_Of_Honor
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -9,8 +9,13 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+2. Attribution: any page, app or service that uses or is based on the Software
+   must keep a visible credit to the original author, such as the existing
+   "Powered by Nouk" link to https://github.com/Blizzard02/PopEpoch_Hall_Of_Honor.
+   The credit may be restyled or moved, but must stay visible and readable.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
