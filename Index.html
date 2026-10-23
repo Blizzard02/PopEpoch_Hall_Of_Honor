@@ -11,7 +11,7 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 20px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 16px 16px 60px; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 16px 16px 20px; }
   h1 { font-size: 28px; margin: 4px 0 12px; }
   h2 { font-size: 23px; margin: 0 0 10px; }
   h3 { font-size: 20px; margin: 18px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
@@ -71,8 +71,9 @@
   .row2 { display: flex; gap: 10px; margin-top: 10px; }
   .row2 .big { flex: 1; }
   .big.confirm { background: var(--red); color: #fff; }
-  .credit { position: fixed; right: 10px; bottom: 8px; z-index: 5; font-size: 14px; padding: 4px 10px; border-radius: 999px;
-            background: rgba(255, 250, 242, .92); border: 1px solid var(--line); color: var(--muted); text-decoration: none; }
+  .footer { text-align: right; margin-top: 28px; }
+  .credit { display: inline-block; font-size: 14px; padding: 4px 10px; border-radius: 999px;
+            background: var(--card); border: 1px solid var(--line); color: var(--muted); text-decoration: none; }
   .credit b { color: var(--gold); }
 </style>
 </head>
@@ -208,9 +209,11 @@
   <div id="stats" class="hidden">
     <div id="statsBody"><div class="spinner">Loading…</div></div>
   </div>
-</div>
 
-<a class="credit" href="https://github.com/Blizzard02/PopEpoch_Hall_Of_Honor" target="_blank" rel="noopener">Powered by <b>Nouk</b></a>
+  <div class="footer">
+    <a class="credit" href="https://github.com/Blizzard02/PopEpoch_Hall_Of_Honor" target="_blank" rel="noopener">Powered by <b>Nouk</b></a>
+  </div>
+</div>
 
 <?!= include('Analyzer'); ?>
 <script>
