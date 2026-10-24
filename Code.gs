@@ -146,6 +146,25 @@ function awardTitles(code, awards) {
   }
 }
 
+/** Leader tool: removes a member's row. Their titles are copied to the Upload Log first, so it can be undone by hand. */
+function deleteMember(code, name) {
+  checkCode_(code);
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sh = sheet_(), cols = columns_(sh), found = findRow_(sh, cols, name);
+    if (found.isNew) throw new Error('"' + name + '" is not in the sheet any more.');
+    var row = sh.getRange(found.row, 1, 1, sh.getLastColumn()).getValues()[0];
+    log_([new Date(), String(name).trim() + ' (removed)'].concat(TITLE_HEADERS.map(function (t) {
+      return Number(row[cols[t] - 1]) || '';
+    })));
+    sh.deleteRow(found.row);
+    return true;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function getStats() {
   var sh = sheet_(), cols = columns_(sh), last = sh.getLastRow();
   var players = [];

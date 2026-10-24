@@ -71,6 +71,9 @@
   .row2 { display: flex; gap: 10px; margin-top: 10px; }
   .row2 .big { flex: 1; }
   .big.confirm { background: var(--red); color: #fff; }
+  .del { margin-top: 8px; padding: 8px 14px; font-size: 16px; font-weight: 700; border-radius: 10px; cursor: pointer;
+         border: 2px solid #f0b4ad; background: #fff; color: var(--red); }
+  .del.confirm { background: var(--red); border-color: var(--red); color: #fff; }
   .footer { text-align: right; margin-top: 28px; }
   .credit { display: inline-block; font-size: 14px; padding: 4px 10px; border-radius: 999px;
             background: var(--card); border: 1px solid var(--line); color: var(--muted); text-decoration: none; }
@@ -191,7 +194,9 @@
         <div class="step">
           <h2>Members</h2>
           <p class="hint" style="margin-top:0"><b>Updated</b> = last time they uploaded their own screenshot.
-            <b>Leader</b> = last event you confirmed them as leader.</p>
+            <b>Leader</b> = last event you confirmed them as leader.
+            <b>Remove</b> deletes someone who left the guild (their titles are kept in the Upload Log).</p>
+          <div id="mMsg" class="msg hidden"></div>
           <label class="lbl" for="mSort">Sort by</label>
           <select id="mSort" onchange="drawMembers()">
             <option value="leader">Longest since leader</option>
@@ -699,11 +704,29 @@ function drawMembers() {
       }
       return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
-  $('mList').innerHTML = list.map(function (p) {
+  membersShown = list;
+  $('mList').innerHTML = list.map(function (p, i) {
     return '<div class="pick" style="display:block;cursor:default"><b>' + esc(p.name) + '</b>' +
       '<span class="sub" style="float:right">' + titlesOwned(p) + ' / ' + statsData.titles.length + ' titles</span>' +
-      '<div style="font-size:17px;margin-top:4px">📷 Updated: ' + when(p.updated) + '<br>👑 Leader: ' + when(p.leader) + '</div></div>';
+      '<div style="font-size:17px;margin-top:4px">📷 Updated: ' + when(p.updated) + '<br>👑 Leader: ' + when(p.leader) + '</div>' +
+      '<button class="del" onclick="removeMember(this,' + i + ')">🗑 Remove</button></div>';
   }).join('') || '<p>No one found.</p>';
+}
+
+var membersShown = [];
+function removeMember(btn, i) {
+  var name = membersShown[i].name;
+  if (needsConfirm(btn, 'Tap again to remove ' + name)) return;
+  btn.disabled = true;
+  google.script.run.withSuccessHandler(function () {
+    flash($('mMsg'), 'ok', '🗑 ' + name + ' was removed.');
+    statsLoaded = false;
+    loadStats();
+    loadPlayers();
+  }).withFailureHandler(function (e) {
+    btn.disabled = false;
+    flash($('mMsg'), 'err', 'Not removed: ' + (e && e.message ? e.message : e));
+  }).deleteMember(leaderCode, name);
 }
 
 loadPlayers();

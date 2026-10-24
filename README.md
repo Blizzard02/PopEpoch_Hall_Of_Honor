@@ -22,7 +22,8 @@ Runs entirely on **Google Apps Script** — no server, no cost, and members don'
   (members without that title who led longest ago) and elites (members without that title, fewest titles first).
   Copy the plan for Discord; after the event, **They won** adds the titles and records the leader date.
 - 🏆 **Won event** — add +1 of a title to members who forgot to upload.
-- 👥 **Members** — each member's last upload and last time as leader.
+- 👥 **Members** — each member's last upload and last time as leader, and a **Remove** button for members who left
+  (tap twice; their titles are copied to the Upload Log first).
 
 Every save is written to an **Upload Log** tab, so mistakes can be undone.
 
