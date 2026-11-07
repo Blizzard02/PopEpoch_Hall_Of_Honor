@@ -18,10 +18,14 @@ Runs entirely on **Google Apps Script** — no server, no cost, and members don'
 **Guild statistics** — who has each title, and for every member what they have and what they're missing.
 
 **Leader tools** (tap *Guild statistics* 5 times, then enter the leader code)
-- 🎯 **Plan event** — choose the leader's title, the elites' title and how many elites. It proposes a leader
-  (members without that title who led longest ago) and elites (members without that title, fewest titles first).
-  Copy the plan for Discord; after the event, **They won** adds the titles and records the leader date.
-- 🏆 **Won event** — add +1 of a title to members who forgot to upload.
+- 🎯 **Plan** — name the event, choose the leader's title, the elites' title and how many elites, an optional
+  members' title (for everyone else in the guild) and what each of them gets **if you come 2nd**. It proposes a leader
+  (members without that title who led longest ago) and elites (members without that title, fewest titles first;
+  anyone already in another open event comes last). Copy the plan for Discord and **Save event**.
+- 📅 **Events** — all open events, so several can run at once. When one ends tap **🏆 Won**, **🥈 2nd** or **❌ Lost**:
+  the matching titles are added and the leader date is recorded (only when the leader gets a title).
+  Events are kept in an **Events** tab that the app creates on its own.
+- ➕ **Add** — add +1 of a title to members who forgot to upload.
 - 👥 **Members** — each member's last upload and last time as leader, and a **Remove** button for members who left
   (tap twice; their titles are copied to the Upload Log first).
 
@@ -38,7 +42,7 @@ You need a Google account. For privacy you can create one just for the guild.
 
 The template has a **Master Sheet** tab plus **Officials / Lords / Overlords / Kings** tabs that fill themselves.
 Using your own sheet instead? It just needs a tab named `Master Sheet` with `Player` and the 16 title names in row 1
-(any order). The app adds `Last updated` and `Last leader` columns and an `Upload Log` tab on its own.
+(any order). The app adds `Last updated` and `Last leader` columns and the `Upload Log` and `Events` tabs on its own.
 
 ### 2. Add the code
 In the sheet: **Extensions → Apps Script**, then create these 4 files and paste the contents from this project:

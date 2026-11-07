@@ -74,6 +74,11 @@
   .del { margin-top: 8px; padding: 8px 14px; font-size: 16px; font-weight: 700; border-radius: 10px; cursor: pointer;
          border: 2px solid #f0b4ad; background: #fff; color: var(--red); }
   .del.confirm { background: var(--red); border-color: var(--red); color: #fff; }
+  .evt { font-size: 17px; margin-top: 4px; }
+  .res { flex: 1; padding: 12px 6px; font-size: 18px; font-weight: 800; border-radius: 12px; cursor: pointer;
+         border: 2px solid var(--line); background: var(--card); color: var(--ink); }
+  .res.won { background: var(--green); border-color: var(--green); color: #fff; }
+  .res.confirm { background: var(--red); border-color: var(--red); color: #fff; }
   .footer { text-align: right; margin-top: 28px; }
   .credit { display: inline-block; font-size: 14px; padding: 4px 10px; border-radius: 999px;
             background: var(--card); border: 1px solid var(--line); color: var(--muted); text-decoration: none; }
@@ -132,46 +137,69 @@
 
     <div id="tools" class="hidden">
       <div class="tabs">
-        <button class="tab on" id="subPlan" onclick="showSub('plan')">🎯 Plan event</button>
-        <button class="tab" id="subWon" onclick="showSub('won')">🏆 Won event</button>
+        <button class="tab on" id="subPlan" onclick="showSub('plan')">🎯 Plan</button>
+        <button class="tab" id="subEvents" onclick="showSub('events')">📅 Events</button>
+        <button class="tab" id="subWon" onclick="showSub('won')">➕ Add</button>
         <button class="tab" id="subMembers" onclick="showSub('members')">👥 Members</button>
       </div>
 
       <div id="plan">
         <div class="step">
           <h2>Event setup</h2>
+          <label class="lbl" for="pName">Event name</label>
+          <input type="text" id="pName" placeholder="e.g. Kingdom Clash" autocomplete="off">
           <label class="lbl" for="pLeader">Leader</label>
           <select id="pLeader" class="players"></select>
           <label class="lbl" for="pLeaderTitle">Leader's title</label>
           <select id="pLeaderTitle" class="titles"></select>
           <label class="lbl" for="pEliteTitle">Elites' title</label>
-          <select id="pEliteTitle" class="titles"></select>
+          <select id="pEliteTitle" class="titles" onchange="syncSecond()"></select>
           <label class="lbl" for="pCount">Number of elites</label>
           <div class="stepper">
             <button onclick="stepCount(-1)">−</button>
             <input type="number" id="pCount" value="5" min="1" max="50" inputmode="numeric">
             <button onclick="stepCount(1)">+</button>
           </div>
+          <label class="lbl" for="pMemberTitle">Members' title</label>
+          <select id="pMemberTitle" class="titles" data-none="— None —"></select>
+          <p class="hint">Given to <b>everyone else</b> in the guild when you win.</p>
+          <h3>🥈 If we come 2nd</h3>
+          <label class="lbl" for="p2Leader">Leader gets</label>
+          <select id="p2Leader" class="titles" data-none="— Nothing —" onchange="this.dataset.touched = '1'"></select>
+          <label class="lbl" for="p2Elite">Elites get</label>
+          <select id="p2Elite" class="titles" data-none="— Nothing —"></select>
+          <label class="lbl" for="p2Member">Members get</label>
+          <select id="p2Member" class="titles" data-none="— Nothing —"></select>
           <button class="big upload" style="margin-top:16px" onclick="propose()">🔍 Propose members</button>
         </div>
 
         <div class="step hidden" id="proposal">
           <div id="pLeaderBox" class="hidden">
             <h2>Proposed leader</h2>
-            <p class="hint" style="margin-top:0">Members who <b>don't have</b> the leader's title, longest since they last led first. Tap to choose another.</p>
+            <p class="hint" style="margin-top:0">Members who <b>don't have</b> the leader's title, longest since they last led first (anyone already in another open event comes last). Tap to choose another.</p>
             <div id="pLeaderList"></div>
           </div>
           <h2 style="margin-top:16px">Proposed elites</h2>
           <div id="pNotes"></div>
-          <p class="hint" style="margin-top:0">Members who <b>don't have</b> this title, fewest titles first. Ticked = proposed. Tap to change.</p>
+          <p class="hint" style="margin-top:0">Members who <b>don't have</b> this title, fewest titles first (anyone already in another open event comes last). Ticked = proposed. Tap to change.</p>
           <div id="pList"></div>
           <label class="lbl" for="pText">Copy for Discord</label>
           <textarea id="pText" readonly onclick="this.select()"></textarea>
           <div class="row2">
             <button class="big plain" onclick="copyPlan()">📋 Copy</button>
-            <button class="big save" id="pWonBtn" onclick="planWon()">🏆 They won</button>
+            <button class="big save" id="pSaveBtn" onclick="savePlan()">💾 Save event</button>
           </div>
           <div id="pMsg" class="msg hidden"></div>
+        </div>
+      </div>
+
+      <div id="events" class="hidden">
+        <div class="step">
+          <h2>Open events</h2>
+          <p class="hint" style="margin-top:0">Events you saved from <b>Plan</b>. When one ends, tap its result (twice to confirm) and the titles are added.
+            <b>Lost</b> closes it without titles.</p>
+          <div id="eMsg" class="msg hidden"></div>
+          <div id="eList"><div class="spinner">Loading…</div></div>
         </div>
       </div>
 
@@ -466,13 +494,14 @@ function unlock() {
     $('tools').classList.remove('hidden');
     statsLoaded = false;
     loadStats();
+    loadEvents();
   }).withFailureHandler(function (e) {
     flash($('lockMsg'), 'err', '❌ ' + (e && e.message ? e.message : e));
   }).verifyCode(code);
 }
 
 function showSub(k) {
-  ['plan', 'won', 'members'].forEach(function (s) {
+  ['plan', 'events', 'won', 'members'].forEach(function (s) {
     $(s).classList.toggle('hidden', s !== k);
     $('sub' + s.charAt(0).toUpperCase() + s.slice(1)).classList.toggle('on', s === k);
   });
@@ -498,10 +527,30 @@ function fillLeaderLists() {
     }).join('');
   });
   document.querySelectorAll('select.titles').forEach(function (sel) {
-    if (!sel.options.length) sel.innerHTML = titleOptions();
+    if (sel.options.length) return;
+    sel.innerHTML = (sel.dataset.none ? '<option value="">' + esc(sel.dataset.none) + '</option>' : '') + titleOptions();
   });
+  syncSecond();
   drawWonList();
   drawMembers();
+  drawEvents();
+}
+
+// On 2nd place the leader gets the elites' title, unless you picked something else.
+function syncSecond() {
+  if (!$('p2Leader').dataset.touched) $('p2Leader').value = $('pEliteTitle').value;
+}
+
+// Name of the open event someone is already leader or elite in ('' if none).
+function busyIn(n) {
+  var k = n.toLowerCase(), ev = (openEvents || []).filter(function (e) {
+    return e.leader.toLowerCase() === k || e.elites.some(function (x) { return x.toLowerCase() === k; });
+  })[0];
+  return ev ? ev.name : '';
+}
+function busyNote(n) {
+  var b = busyIn(n);
+  return b ? '<br>📅 in ' + esc(b) : '';
 }
 
 function playerByName(n) {
@@ -527,12 +576,15 @@ function propose() {
   if (!statsData) return;
   var choice = $('pLeader').value, leaderTitle = $('pLeaderTitle').value;
   plan = {auto: choice === '', leaderTitle: leaderTitle, elite: $('pEliteTitle').value,
-          want: Math.max(1, parseInt($('pCount').value, 10) || 1), leaderCands: []};
+          want: Math.max(1, parseInt($('pCount').value, 10) || 1), leaderCands: [],
+          name: $('pName').value.trim() || 'Event ' + new Date().toLocaleDateString(),
+          memberTitle: $('pMemberTitle').value,
+          second: {leader: $('p2Leader').value, elite: $('p2Elite').value, member: $('p2Member').value}};
   if (plan.auto) {
     plan.leaderCands = statsData.players
       .filter(function (p) { return !(p.counts[leaderTitle] > 0); })
       .sort(function (a, b) {
-        return stamp(a.leader) - stamp(b.leader) || titlesOwned(b) - titlesOwned(a) ||
+        return isBusy(a) - isBusy(b) || stamp(a.leader) - stamp(b.leader) || titlesOwned(b) - titlesOwned(a) ||
                a.name.toLowerCase().localeCompare(b.name.toLowerCase());
       })
       .slice(0, 6);
@@ -547,11 +599,15 @@ function propose() {
   $('proposal').scrollIntoView({behavior: 'smooth'});
 }
 
-// Elites: members without the elites' title (never the leader), fewest titles first.
+function isBusy(p) { return busyIn(p.name) ? 1 : 0; }
+
+// Elites: members without the elites' title (never the leader), fewest titles first; those busy in another event last.
 function pickElites() {
   plan.candidates = statsData.players
     .filter(function (p) { return !(p.counts[plan.elite] > 0) && p.name !== plan.leader; })
-    .sort(function (a, b) { return titlesOwned(a) - titlesOwned(b) || a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
+    .sort(function (a, b) {
+      return isBusy(a) - isBusy(b) || titlesOwned(a) - titlesOwned(b) || a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
   plan.picked = plan.candidates.slice(0, plan.want).map(function (p) { return p.name; });
 }
 
@@ -567,7 +623,7 @@ function drawPlan() {
     $('pLeaderList').innerHTML = plan.leaderCands.map(function (p, i) {
       var on = p.name === plan.leader;
       return '<label class="pick' + (on ? ' on' : '') + '"><input type="radio" name="lead"' + (on ? ' checked' : '') + ' onchange="chooseLeader(' + i + ')">' +
-        '<span>' + esc(p.name) + '</span><span class="sub">led: ' + when(p.leader) + '</span></label>';
+        '<span>' + esc(p.name) + '</span><span class="sub">led: ' + when(p.leader) + busyNote(p.name) + '</span></label>';
     }).join('') || '<p>Everybody already has ' + esc(plan.leaderTitle) + '.</p>';
   }
 
@@ -582,14 +638,20 @@ function drawPlan() {
   $('pList').innerHTML = plan.candidates.map(function (p, i) {
     var on = plan.picked.indexOf(p.name) >= 0;
     return '<label class="pick' + (on ? ' on' : '') + '"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="togglePick(' + i + ')">' +
-      '<span>' + esc(p.name) + '</span><span class="sub">' + titlesOwned(p) + ' / ' + statsData.titles.length + ' titles</span></label>';
+      '<span>' + esc(p.name) + '</span><span class="sub">' + titlesOwned(p) + ' / ' + statsData.titles.length + ' titles' + busyNote(p.name) + '</span></label>';
   }).join('') || '<p>Everybody already has this title.</p>';
-  var lines = ['⚔️ Event plan'];
+  var lines = ['⚔️ ' + plan.name];
   if (plan.leader) lines.push('Leader: ' + plan.leader + ' → ' + plan.leaderTitle);
   lines.push('Elites → ' + plan.elite + ' (' + plan.picked.length + '):');
   plan.picked.forEach(function (n, i) { lines.push((i + 1) + '. ' + n); });
+  if (plan.memberTitle) lines.push('Everyone else → ' + plan.memberTitle);
+  var s = plan.second, nothing = function (t) { return t || 'nothing'; };
+  if (s.leader || s.elite || s.member) {
+    lines.push('🥈 If 2nd: leader → ' + nothing(s.leader) + ', elites → ' + nothing(s.elite) + ', members → ' + nothing(s.member));
+  }
   $('pText').value = lines.join('\n');
-  resetConfirm($('pWonBtn'), '🏆 They won');
+  $('pSaveBtn').disabled = !!plan.saved;
+  $('pSaveBtn').textContent = plan.saved ? '✔ Saved' : '💾 Save event';
 }
 
 function togglePick(i) {
@@ -642,14 +704,76 @@ function sendAwards(awards, btn, msg, after) {
   }).awardTitles(leaderCode, awards);
 }
 
-function planWon() {
-  var awards = [];
-  if (plan.leader) awards.push({title: plan.leaderTitle, names: [plan.leader], leader: true});
-  if (plan.picked.length) awards.push({title: plan.elite, names: plan.picked.slice()});
-  var n = awards.reduce(function (s, a) { return s + a.names.length; }, 0);
-  if (!n) return;
-  if (needsConfirm($('pWonBtn'), 'Tap again to add ' + plural(n, 'title'))) return;
-  sendAwards(awards, $('pWonBtn'), $('pMsg'), function () { $('pWonBtn').textContent = '✔ Saved'; });
+function savePlan() {
+  if (!plan || plan.saved) return;
+  var btn = $('pSaveBtn');
+  btn.disabled = true;
+  google.script.run.withSuccessHandler(function () {
+    plan.saved = true;
+    drawPlan();
+    flash($('pMsg'), 'ok', '💾 Saved! When it ends, open 📅 Events and tap the result.');
+    loadEvents();
+  }).withFailureHandler(function (e) {
+    btn.disabled = false;
+    flash($('pMsg'), 'err', 'Not saved: ' + (e && e.message ? e.message : e));
+  }).saveEvent(leaderCode, {name: plan.name, leader: plan.leader, leaderTitle: plan.leaderTitle, eliteTitle: plan.elite,
+                            elites: plan.picked.slice(), memberTitle: plan.memberTitle, second: plan.second});
+}
+
+/* ---------- Open events ---------- */
+var openEvents = null;
+
+function loadEvents() {
+  google.script.run.withSuccessHandler(function (list) { openEvents = list; drawEvents(); })
+    .withFailureHandler(function (e) { $('eList').innerHTML = '<div class="msg err">Could not load: ' + esc(e.message || e) + '</div>'; })
+    .listEvents(leaderCode);
+}
+
+function rewards(ev, result) {
+  return result === 'won' ? {leader: ev.leaderTitle, elite: ev.eliteTitle, member: ev.memberTitle}
+       : result === '2nd' ? ev.second : {};
+}
+
+// How many titles a result adds; the members' title goes to everyone who isn't the leader or an elite.
+function eventCount(ev, result) {
+  var get = rewards(ev, result), taken = [ev.leader].concat(ev.elites).map(function (n) { return n.toLowerCase(); });
+  var others = statsData.players.filter(function (p) { return taken.indexOf(p.name.toLowerCase()) < 0; }).length;
+  return (get.leader && ev.leader ? 1 : 0) + (get.elite ? ev.elites.length : 0) + (get.member ? others : 0);
+}
+
+function gives(t) { return t ? esc(t) : '<i>nothing</i>'; }
+
+function drawEvents() {
+  if (!openEvents || !statsData) return;
+  $('subEvents').textContent = '📅 Events' + (openEvents.length ? ' (' + openEvents.length + ')' : '');
+  $('eList').innerHTML = openEvents.map(function (ev, i) {
+    var s = ev.second;
+    return '<div class="pick" style="display:block;cursor:default"><b>' + esc(ev.name) + '</b>' +
+      '<div class="evt">👑 Leader: ' + (ev.leader ? esc(ev.leader) + ' → ' + gives(ev.leaderTitle) : '<i>none</i>') +
+      '<br>⚔️ Elites → ' + gives(ev.eliteTitle) + ': ' + (ev.elites.length ? ev.elites.map(esc).join(', ') : '<i>none</i>') +
+      (ev.memberTitle ? '<br>👥 Everyone else → ' + esc(ev.memberTitle) : '') +
+      '<br>🥈 If 2nd: leader → ' + gives(s.leader) + ', elites → ' + gives(s.elite) + ', members → ' + gives(s.member) + '</div>' +
+      '<div class="row2"><button class="res won" onclick="closeEv(this,' + i + ',\'won\')">🏆 Won</button>' +
+      '<button class="res" onclick="closeEv(this,' + i + ',\'2nd\')">🥈 2nd</button>' +
+      '<button class="res" onclick="closeEv(this,' + i + ',\'lost\')">❌ Lost</button></div></div>';
+  }).join('') || '<p>No open events. Plan one in 🎯 Plan.</p>';
+}
+
+function closeEv(btn, i, result) {
+  var ev = openEvents[i];
+  if (needsConfirm(btn, result === 'lost' ? 'Tap again' : 'Tap again: ' + plural(eventCount(ev, result), 'title'))) return;
+  document.querySelectorAll('#eList .res').forEach(function (b) { b.disabled = true; });
+  google.script.run.withSuccessHandler(function (r) {
+    flash($('eMsg'), 'ok', result === 'lost' ? '✔ ' + ev.name + ' closed.' : '🎉 ' + ev.name + ': ' + plural(r.done, 'title') + ' added.');
+    openEvents.splice(openEvents.indexOf(ev), 1);
+    drawEvents();
+    loadEvents();
+    statsLoaded = false;
+    loadStats();
+  }).withFailureHandler(function (e) {
+    flash($('eMsg'), 'err', 'Not saved: ' + (e && e.message ? e.message : e));
+    drawEvents();
+  }).closeEvent(leaderCode, ev.id, result);
 }
 
 var wonPicked = [];
