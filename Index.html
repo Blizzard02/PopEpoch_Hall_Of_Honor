@@ -181,8 +181,16 @@
           </div>
           <h2 style="margin-top:16px">Proposed elites</h2>
           <div id="pNotes"></div>
-          <p class="hint" style="margin-top:0">Members who <b>don't have</b> this title, fewest titles first (anyone already in another open event comes last). Ticked = proposed. Tap to change.</p>
+          <p class="hint" style="margin-top:0">Members who <b>don't have</b> this title, fewest titles first (anyone already in another open event comes last). Ticked = proposed. Tap to change.
+            To pick someone who already has the title, open the box under the list.</p>
           <div id="pList"></div>
+          <details id="pOthersBox" style="margin-top:10px">
+            <summary><span>➕ Also pick members who already have it</span><span class="cnt" id="pOthersCnt"></span></summary>
+            <div class="body">
+              <input type="text" id="pOthersSearch" placeholder="🔍 Search a name" oninput="drawOthers()" style="margin:4px 0 10px">
+              <div id="pOthers"></div>
+            </div>
+          </details>
           <label class="lbl" for="pText">Copy for Discord</label>
           <textarea id="pText" readonly onclick="this.select()"></textarea>
           <div class="row2">
@@ -609,6 +617,11 @@ function pickElites() {
       return isBusy(a) - isBusy(b) || titlesOwned(a) - titlesOwned(b) || a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
   plan.picked = plan.candidates.slice(0, plan.want).map(function (p) { return p.name; });
+  // Members who already have the title: never proposed, but you can still tick them.
+  plan.others = statsData.players
+    .filter(function (p) { return p.counts[plan.elite] > 0 && p.name !== plan.leader; })
+    .sort(function (a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
+  $('pOthersSearch').value = '';
 }
 
 function chooseLeader(i) {
@@ -632,14 +645,15 @@ function drawPlan() {
     var lp = playerByName(plan.leader), have = lp ? lp.counts[plan.leaderTitle] : 0;
     if (have > 0) notes += '<div class="msg warn">ℹ️ ' + esc(plan.leader) + ' already has ' + esc(plan.leaderTitle) + (have > 1 ? ' ×' + have : '') + '.</div>';
   }
-  if (plan.candidates.length < plan.want) notes += '<div class="msg warn">⚠️ Only ' + plural(plan.candidates.length, 'member') + ' don\'t have ' + esc(plan.elite) + '.</div>';
+  if (plan.candidates.length < plan.want) notes += '<div class="msg warn">⚠️ Only ' + plural(plan.candidates.length, 'member') + ' don\'t have ' + esc(plan.elite) + '. Open the box under the list to add members who already have it.</div>';
   $('pNotes').innerHTML = notes;
 
   $('pList').innerHTML = plan.candidates.map(function (p, i) {
     var on = plan.picked.indexOf(p.name) >= 0;
-    return '<label class="pick' + (on ? ' on' : '') + '"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="togglePick(' + i + ')">' +
+    return '<label class="pick' + (on ? ' on' : '') + '"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="togglePick(\'candidates\',' + i + ')">' +
       '<span>' + esc(p.name) + '</span><span class="sub">' + titlesOwned(p) + ' / ' + statsData.titles.length + ' titles' + busyNote(p.name) + '</span></label>';
   }).join('') || '<p>Everybody already has this title.</p>';
+  drawOthers();
   var lines = ['⚔️ ' + plan.name];
   if (plan.leader) lines.push('Leader: ' + plan.leader + ' → ' + plan.leaderTitle);
   lines.push('Elites → ' + plan.elite + ' (' + plan.picked.length + '):');
@@ -654,8 +668,22 @@ function drawPlan() {
   $('pSaveBtn').textContent = plan.saved ? '✔ Saved' : '💾 Save event';
 }
 
-function togglePick(i) {
-  var n = plan.candidates[i].name, at = plan.picked.indexOf(n);
+// Ticked members always stay visible, whatever the search says.
+function drawOthers() {
+  var q = $('pOthersSearch').value.trim().toLowerCase(), ticked = 0;
+  $('pOthersBox').classList.toggle('hidden', !plan.others.length);
+  $('pOthers').innerHTML = plan.others.map(function (p, i) {
+    var on = plan.picked.indexOf(p.name) >= 0;
+    if (on) ticked++;
+    if (q && !on && p.name.toLowerCase().indexOf(q) < 0) return '';
+    return '<label class="pick' + (on ? ' on' : '') + '"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="togglePick(\'others\',' + i + ')">' +
+      '<span>' + esc(p.name) + '</span><span class="sub">has ×' + p.counts[plan.elite] + busyNote(p.name) + '</span></label>';
+  }).join('') || '<p>No one found.</p>';
+  $('pOthersCnt').textContent = ticked ? ticked + ' ticked' : plural(plan.others.length, 'member');
+}
+
+function togglePick(list, i) {
+  var n = plan[list][i].name, at = plan.picked.indexOf(n);
   if (at >= 0) plan.picked.splice(at, 1); else plan.picked.push(n);
   drawPlan();
 }
