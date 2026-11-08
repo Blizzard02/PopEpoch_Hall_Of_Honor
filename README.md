@@ -25,8 +25,8 @@ Runs entirely on **Google Apps Script** — no server, no cost, and members don'
 - 📅 **Events** — all open events, so several can run at once. When one ends tap **🏆 Won**, **🥈 2nd** or **❌ Lost**:
   the matching titles are added and the leader date is recorded (only when the leader gets a title).
   Events are kept in an **Events** tab that the app creates on its own.
-- ➕ **Add** — add +1 of a title to members who forgot to upload.
-- 👥 **Members** — each member's last upload and last time as leader, and a **Remove** button for members who left
+- 🎖️ **Give titles** — add +1 of a title to members who forgot to upload.
+- 👥 **Members** — **Add a member** by name, see each member's last upload and last time as leader, and a **Remove** button for members who left
   (tap twice; their titles are copied to the Upload Log first).
 
 Every save is written to an **Upload Log** tab, so mistakes can be undone.

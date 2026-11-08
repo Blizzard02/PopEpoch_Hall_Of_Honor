@@ -139,7 +139,7 @@
       <div class="tabs">
         <button class="tab on" id="subPlan" onclick="showSub('plan')">🎯 Plan</button>
         <button class="tab" id="subEvents" onclick="showSub('events')">📅 Events</button>
-        <button class="tab" id="subWon" onclick="showSub('won')">➕ Add</button>
+        <button class="tab" id="subWon" onclick="showSub('won')">🎖️ Give titles</button>
         <button class="tab" id="subMembers" onclick="showSub('members')">👥 Members</button>
       </div>
 
@@ -213,7 +213,7 @@
 
       <div id="won" class="hidden">
         <div class="step">
-          <h2>Add won titles</h2>
+          <h2>Give titles</h2>
           <p class="hint" style="margin-top:0">For members who forgot to upload. Adds <b>+1</b> of the title to everyone ticked.</p>
           <label class="lbl" for="wTitle">Title won</label>
           <select id="wTitle" class="titles" onchange="drawWonList()"></select>
@@ -232,6 +232,11 @@
           <p class="hint" style="margin-top:0"><b>Updated</b> = last time they uploaded their own screenshot.
             <b>Leader</b> = last event you confirmed them as leader.
             <b>Remove</b> deletes someone who left the guild (their titles are kept in the Upload Log).</p>
+          <label class="lbl" for="mNew">Add a member</label>
+          <div class="row2" style="margin-top:0">
+            <input type="text" id="mNew" placeholder="Game name" autocomplete="off" onkeydown="if(event.key==='Enter')addMember()">
+            <button class="big save" id="mAddBtn" style="flex:none;width:auto;padding:14px 20px" onclick="addMember()">➕ Add</button>
+          </div>
           <div id="mMsg" class="msg hidden"></div>
           <label class="lbl" for="mSort">Sort by</label>
           <select id="mSort" onchange="drawMembers()">
@@ -863,6 +868,23 @@ function drawMembers() {
       '<div style="font-size:17px;margin-top:4px">📷 Updated: ' + when(p.updated) + '<br>👑 Leader: ' + when(p.leader) + '</div>' +
       '<button class="del" onclick="removeMember(this,' + i + ')">🗑 Remove</button></div>';
   }).join('') || '<p>No one found.</p>';
+}
+
+function addMember() {
+  var name = $('mNew').value.trim(), btn = $('mAddBtn');
+  if (!name) return;
+  btn.disabled = true;
+  google.script.run.withSuccessHandler(function () {
+    btn.disabled = false;
+    $('mNew').value = '';
+    flash($('mMsg'), 'ok', '➕ ' + name + ' was added.');
+    statsLoaded = false;
+    loadStats();
+    loadPlayers();
+  }).withFailureHandler(function (e) {
+    btn.disabled = false;
+    flash($('mMsg'), 'err', 'Not added: ' + (e && e.message ? e.message : e));
+  }).addMember(leaderCode, name);
 }
 
 var membersShown = [];
