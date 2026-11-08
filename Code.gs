@@ -236,6 +236,24 @@ function closeEvent(code, id, result) {
   }
 }
 
+/** Leader tool: adds a new member (name only, no titles yet). */
+function addMember(code, name) {
+  checkCode_(code);
+  name = String(name || '').trim();
+  if (!name) throw new Error('Please type a name.');
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sh = sheet_(), cols = columns_(sh), found = findRow_(sh, cols, name);
+    if (!found.isNew) throw new Error('"' + name + '" is already in the list.');
+    sh.getRange(found.row, cols.Player).setValue(name);
+    log_([[new Date(), name + ' (added)'].concat(TITLE_HEADERS.map(function () { return ''; }))]);
+    return true;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 /** Leader tool: removes a member's row. Their titles are copied to the Upload Log first, so it can be undone by hand. */
 function deleteMember(code, name) {
   checkCode_(code);
